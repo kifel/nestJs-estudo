@@ -12,6 +12,14 @@ export class PrimaRocketMembersRepository implements RocketMembersRepository {
     memberFunction: string,
   ): Promise<CreateTeamMemberResponse> {
     const id = randomUUID();
+    const existingMember = await this.prisma.rocketTeamMember.findFirst({
+      where: {
+        name: name,
+      },
+    });
+    if (existingMember) {
+      throw new Error(`O membro com o nome "${name}" já existe.`);
+    }
     const createdMember = await this.prisma.rocketTeamMember.create({
       data: {
         id,
@@ -19,6 +27,7 @@ export class PrimaRocketMembersRepository implements RocketMembersRepository {
         function: memberFunction,
       },
     });
+
     return {
       id: createdMember.id,
       name: createdMember.name,
