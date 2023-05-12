@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { PrismaService } from 'src/database/prisma.service';
-import { CreateTeamMemberResponse } from 'src/dtos/create-team-member-response';
+import { CreateTeamMemberResponse } from 'src/dtos/create-team-member-response.dto';
 import { RocketMembersRepository } from '../rocket-members-repository';
 
 @Injectable()

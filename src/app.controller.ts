@@ -1,7 +1,9 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { CreateTeamMemberBody } from './dtos/create-team-member-body';
+import { ApiTags } from '@nestjs/swagger';
+import { CreateTeamMemberBody } from './dtos/create-team-member-body.dto';
 import { RocketMembersRepository } from './repositories/rocket-members-repository';
 
+@ApiTags('User')
 @Controller()
 export class AppController {
   constructor(private rocketMembersRepository: RocketMembersRepository) {}
