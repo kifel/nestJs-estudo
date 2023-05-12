@@ -18,7 +18,7 @@ export class PrimaRocketMembersRepository implements RocketMembersRepository {
       },
     });
     if (existingMember) {
-      throw new Error(`O membro com o nome "${name}" já existe.`);
+      throw new Error(`O membro com o nome '${name}' já existe.`);
     }
     const createdMember = await this.prisma.rocketTeamMember.create({
       data: {
