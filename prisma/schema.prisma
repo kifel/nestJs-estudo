@@ -10,8 +10,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model RocketTeamMember {
-  id String @id
-  name String
-  function String
+// Definindo o modelo Roles
+model Roles {
+  id    Int    @id @default(autoincrement())
+  name  String
+  users User[] @relation("UserRole")
+}
+
+// Definindo o modelo User
+model User {
+  id           Int            @id @default(autoincrement())
+  name         String
+  email        String         @unique
+  password     String
+  roles        Roles[]        @relation("UserRole")
+  refreshToken RefreshToken[]
+}
+
+// Definindo o modelo RefreshToken
+model RefreshToken {
+  id         Int      @id @default(autoincrement())
+  token      String
+  expiryDate DateTime
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int
 }
