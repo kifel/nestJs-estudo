@@ -98,4 +98,18 @@ export class UserService implements UserRepository {
       }
     }
   }
+
+  private async findByName(name: string) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        name,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User ${name} not found`);
+    }
+
+    return user;
+  }
 }
