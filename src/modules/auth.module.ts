@@ -1,9 +1,11 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { PrismaService } from 'src/config/database/prisma.service';
+import { JwtStrategy } from 'src/config/strategy/jwt.strategt';
 import { LocalStrategy } from 'src/config/strategy/local.strategy';
 import { AuthController } from 'src/controllers/auth.controller';
+import { UserRequestLogin } from 'src/dtos/user-request.dto';
 import { AuthRepository } from 'src/repositories/auth-repository';
 import { AuthService } from 'src/services/auth.service';
 import { UserModule } from './user.module';
@@ -25,6 +27,11 @@ import { UserModule } from './user.module';
       useClass: AuthService,
     },
     LocalStrategy,
+    JwtStrategy,
   ],
 })
-export class AuthModule {}
+export class AuthModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(UserRequestLogin).forRoutes('login');
+  }
+}

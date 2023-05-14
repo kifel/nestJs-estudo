@@ -23,3 +23,8 @@ export class UserResponseLogin {
   accessToken: string;
   refreshToken: string;
 }
+
+export class UserResponseJWT {
+  id: number;
+  name: string;
+}

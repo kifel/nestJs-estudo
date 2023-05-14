@@ -12,6 +12,10 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('User')
     .addTag('Auth')
+    .addSecurity('bearer', {
+      type: 'http',
+      scheme: 'bearer',
+    })
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
