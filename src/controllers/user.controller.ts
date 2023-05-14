@@ -9,8 +9,10 @@ import {
 } from '@nestjs/swagger';
 import { CurrentUser } from 'src/config/decorators/current-user.decorator';
 import { IsPublic } from 'src/config/decorators/is-public.decorator';
+import { Roles } from 'src/config/decorators/roles.decorator';
 import { UserRequest } from 'src/dtos/user-request.dto';
 import { UserResponseJWT } from 'src/dtos/user-response.dto';
+import { UserRole } from 'src/enums/UserRole';
 import { UserFromJwt } from 'src/models/user-from-jwt';
 import { UserRepository } from 'src/repositories/user-repository';
 
@@ -22,6 +24,7 @@ export class UserController {
   /*
    * Retornar usuário logado pelo token
    */
+  @Roles(UserRole.User)
   @Get('me')
   @ApiOperation({
     summary: 'Dados do usuário logado',

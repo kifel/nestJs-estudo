@@ -1,9 +1,14 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'node:crypto';
 import { PrismaService } from 'src/config/database/prisma.service';
 import { UserResponse, UserResponseLogin } from 'src/dtos/user-response.dto';
+import { UserFromJwt } from 'src/models/user-from-jwt';
 import { UserPayload } from 'src/models/user-payload';
 import { AuthRepository } from 'src/repositories/auth-repository';
 import { UserRepository } from 'src/repositories/user-repository';
@@ -81,5 +86,24 @@ export class AuthService implements AuthRepository {
       },
     });
     return refreshToken.token;
+  }
+
+  async validateRoles(user: UserFromJwt): Promise<string[]> {
+    const userLogged = await this.prisma.user.findUnique({
+      where: {
+        id: user.id,
+      },
+      include: {
+        roles: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+    if (!userLogged) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+    return userLogged.roles.map((role) => role.name);
   }
 }
