@@ -22,10 +22,9 @@ export class RolesGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<AuthRequest>();
-    const roles = await this.authRepository.validateRoles(request.user);
-
-    const hasRequiredRole = requiredRoles.some((requiredRole) =>
-      roles.includes(requiredRole),
+    const hasRequiredRole = await this.authRepository.validateRoles(
+      request.user,
+      requiredRoles,
     );
 
     return hasRequiredRole;

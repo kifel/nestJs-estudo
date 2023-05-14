@@ -24,7 +24,7 @@ export class UserController {
   /*
    * Retornar usuário logado pelo token
    */
-  @Roles(UserRole.User)
+  @Roles(UserRole.Admin, UserRole.User)
   @Get('me')
   @ApiOperation({
     summary: 'Dados do usuário logado',

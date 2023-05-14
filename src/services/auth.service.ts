@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'node:crypto';
 import { PrismaService } from 'src/config/database/prisma.service';
 import { UserResponse, UserResponseLogin } from 'src/dtos/user-response.dto';
+import { UserRole } from 'src/enums/UserRole';
 import { UserFromJwt } from 'src/models/user-from-jwt';
 import { UserPayload } from 'src/models/user-payload';
 import { AuthRepository } from 'src/repositories/auth-repository';
@@ -88,7 +89,10 @@ export class AuthService implements AuthRepository {
     return refreshToken.token;
   }
 
-  async validateRoles(user: UserFromJwt): Promise<string[]> {
+  async validateRoles(
+    user: UserFromJwt,
+    requiredRoles: UserRole[],
+  ): Promise<boolean> {
     const userLogged = await this.prisma.user.findUnique({
       where: {
         id: user.id,
@@ -104,6 +108,13 @@ export class AuthService implements AuthRepository {
     if (!userLogged) {
       throw new NotFoundException('Usuário não encontrado');
     }
-    return userLogged.roles.map((role) => role.name);
+
+    const roles = userLogged.roles.map((role) => role.name);
+
+    const hasRequiredRole = requiredRoles.some((requiredRole) =>
+      roles.includes(requiredRole),
+    );
+
+    return hasRequiredRole;
   }
 }
