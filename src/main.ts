@@ -11,6 +11,7 @@ async function bootstrap() {
     .setDescription('The kifel API description')
     .setVersion('1.0')
     .addTag('User')
+    .addTag('Auth')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

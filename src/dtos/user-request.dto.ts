@@ -24,3 +24,19 @@ export class UserRequest {
   @IsStrongPassword()
   password: string;
 }
+
+export class UserRequestLogin {
+  /**
+   * Nome do usuário, ele deve ser único e será utilizado para logar na aplicação
+   * @example kifel
+   */
+  @IsNotEmpty()
+  name: string;
+
+  /**
+   * senha do usuário, ele deve ser uma senha forte
+   * @example 2@*-dasdak@278920d_Fa
+   */
+  @IsNotEmpty()
+  password: string;
+}

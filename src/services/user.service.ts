@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { PrismaService } from 'src/config/prisma.service';
+import { PrismaService } from 'src/config/database/prisma.service';
 import { UserRequest } from 'src/dtos/user-request.dto';
 import { UserResponse } from 'src/dtos/user-response.dto';
 import { UserRole } from 'src/enums/UserRole';
@@ -31,7 +31,7 @@ export class UserService implements UserRepository {
 
     if (!role) {
       throw new NotFoundException(
-        'Cargo não configurados no banco de dados, por favor contactar o ADMIN do sistema',
+        'Cargo não configurados no banco de dados, por favor contactar o ADMIN do sistema.',
       );
     }
 
@@ -90,19 +90,37 @@ export class UserService implements UserRepository {
 
     if (existingUser) {
       if (existingUser.name === name) {
-        throw new ConflictException(`Já existe um usuário com o nome ${name}.`);
+        throw new ConflictException(
+          `Já existe um usuário com o nome '${name}'.`,
+        );
       } else {
         throw new ConflictException(
-          `Já existe um usuário com o email ${email}.`,
+          `Já existe um usuário com o email '${email}'.`,
         );
       }
     }
   }
 
-  private async findByName(name: string) {
+  /**
+   * This is an async function that finds a user by their name and includes their roles, throwing a
+   * NotFoundException if the user is not found.
+   * @param {string} name - A string representing the name of the user to be searched for.
+   * @returns The `findByName` function returns a user object that matches the given name parameter. If
+   * no user is found, it throws a `NotFoundException` with a message indicating that the user was not
+   * found. The returned user object includes an array of roles, where each role object contains the name
+   * property.
+   */
+  async findByName(name: string) {
     const user = await this.prisma.user.findFirst({
       where: {
         name,
+      },
+      include: {
+        roles: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
 

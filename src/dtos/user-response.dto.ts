@@ -18,3 +18,8 @@ export class UserResponse {
    */
   roles: RolesRequestUser[];
 }
+
+export class UserResponseLogin {
+  accessToken: string;
+  refreshToken: string;
+}
