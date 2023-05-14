@@ -3,9 +3,11 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiConflictResponse,
+  ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOperation,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CurrentUser } from 'src/config/decorators/current-user.decorator';
 import { IsPublic } from 'src/config/decorators/is-public.decorator';
@@ -30,6 +32,25 @@ export class UserController {
     summary: 'Dados do usuário logado',
   })
   @ApiBearerAuth()
+  @ApiUnauthorizedResponse({
+    description: 'Sem autorização',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+      },
+    },
+  })
+  @ApiForbiddenResponse({
+    description: 'Sem permissão',
+    schema: {
+      example: {
+        statusCode: 403,
+        message: 'Forbidden resource',
+        error: 'Forbidden',
+      },
+    },
+  })
   getMe(@CurrentUser() user: UserFromJwt): UserResponseJWT {
     return user;
   }
