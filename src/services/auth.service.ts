@@ -16,7 +16,7 @@ import { UserPayload } from 'src/models/user-payload';
 import { AuthRepository } from 'src/repositories/auth-repository';
 import { UserRepository } from 'src/repositories/user-repository';
 
-// [ ] Melhorar essa classe adicionando o findById, assim que for implementado essa função no user service
+// [x] Melhorar essa classe adicionando o findById, assim que for implementado essa função no user service
 
 @Injectable()
 export class AuthService implements AuthRepository {
@@ -29,8 +29,9 @@ export class AuthService implements AuthRepository {
   /**
    * This function refreshes a user's access token using their refresh token if it is valid and belongs
    * to the correct user.
-   * @param {RefreshTokenRequest} token - A RefreshTokenRequest object containing the refresh token and
-   * user ID.
+   * @param {RefreshTokenRequest} token - The parameter `token` is an object of type
+   * `RefreshTokenRequest` which contains a `refreshToken` string property and a `userId` string
+   * property.
    * @returns a Promise that resolves to a UserResponseLogin object.
    */
   async refreshToken(token: RefreshTokenRequest): Promise<UserResponseLogin> {
@@ -42,31 +43,29 @@ export class AuthService implements AuthRepository {
     // Verifica se o token foi encontrado
     if (refreshToken) {
       // Verifica se o token pertence ao usuário que foi informado e se ele esta expirado
-      if (!this.isRefreshTokenExpired(refreshToken)) {
-        if (refreshToken.userId === token.userId) {
-          const user = await this.prisma.user.findUnique({
-            where: {
-              id: token.userId,
-            },
-            include: {
-              roles: {
-                select: {
-                  name: true,
-                },
-              },
-            },
-          });
-          await this.prisma.refreshToken.delete({
-            where: {
-              id: refreshToken.id,
-            },
-          });
+      if (refreshToken.userId === token.userId) {
+        await this.deleteRefreshToken(refreshToken.id);
+        if (!this.isRefreshTokenExpired(refreshToken)) {
+          const user = await this.userRepository.findById(refreshToken.userId);
 
           return await this.generateToken(user);
         }
       }
     }
     throw new UnauthorizedException('Dados inválidos.');
+  }
+
+  /**
+   * This function deletes a refresh token from the database using its ID.
+   * @param {number} id - The id parameter is a number that represents the unique identifier of the
+   * refresh token that needs to be deleted.
+   */
+  private async deleteRefreshToken(id: number) {
+    await this.prisma.refreshToken.delete({
+      where: {
+        id,
+      },
+    });
   }
 
   /**
@@ -100,7 +99,7 @@ export class AuthService implements AuthRepository {
     };
     const jwtToken = this.jwtService.sign(payload);
 
-    const refreshToken = await this.createRefreshTokenToken(user);
+    const refreshToken = await this.createRefreshToken(user);
 
     return {
       accessToken: jwtToken,
@@ -145,7 +144,7 @@ export class AuthService implements AuthRepository {
    * used to associate the refresh token with a specific user in the database.
    * @returns a string which is the token generated for the refresh token.
    */
-  private async createRefreshTokenToken(user: UserResponse): Promise<string> {
+  private async createRefreshToken(user: UserResponse): Promise<string> {
     const agora = new Date();
     const trintaDiasDepois = new Date(
       agora.getTime() + 30 * 24 * 60 * 60 * 1000,
@@ -173,18 +172,7 @@ export class AuthService implements AuthRepository {
     user: UserFromJwt,
     requiredRoles: UserRole[],
   ): Promise<boolean> {
-    const userLogged = await this.prisma.user.findUnique({
-      where: {
-        id: user.id,
-      },
-      include: {
-        roles: {
-          select: {
-            name: true,
-          },
-        },
-      },
-    });
+    const userLogged = await this.userRepository.findById(user.id);
     if (!userLogged) {
       throw new NotFoundException('Usuário não encontrado');
     }

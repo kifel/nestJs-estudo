@@ -114,12 +114,14 @@ export class UserService implements UserRepository {
         OR: [
           {
             name: {
-              equals: name.toLowerCase(), // ou name.toUpperCase()
+              equals: name,
+              mode: 'insensitive',
             },
           },
           {
             email: {
-              equals: email.toLowerCase(), // ou email.toUpperCase()
+              equals: email,
+              mode: 'insensitive',
             },
           },
         ],
@@ -151,7 +153,10 @@ export class UserService implements UserRepository {
   async findByName(name: string) {
     const user = await this.prisma.user.findFirst({
       where: {
-        name,
+        name: {
+          equals: name,
+          mode: 'insensitive',
+        },
       },
       include: {
         roles: {
@@ -163,7 +168,7 @@ export class UserService implements UserRepository {
     });
 
     if (!user) {
-      throw new NotFoundException(`User ${name} not found`);
+      throw new Error('Usuário ou senha inválidos.');
     }
 
     return user;
