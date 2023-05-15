@@ -13,7 +13,6 @@ import { CurrentUser } from 'src/config/decorators/current-user.decorator';
 import { IsPublic } from 'src/config/decorators/is-public.decorator';
 import { Roles } from 'src/config/decorators/roles.decorator';
 import { UserRequest } from 'src/dtos/user-request.dto';
-import { UserResponseJWT } from 'src/dtos/user-response.dto';
 import { UserRole } from 'src/enums/UserRole';
 import { UserFromJwt } from 'src/models/user-from-jwt';
 import { UserRepository } from 'src/repositories/user-repository';
@@ -51,8 +50,18 @@ export class UserController {
       },
     },
   })
-  getMe(@CurrentUser() user: UserFromJwt): UserResponseJWT {
-    return user;
+  @ApiNotFoundResponse({
+    description: 'Usuario não encontado.',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: `Usuario não encontado.`,
+        error: 'Not Found',
+      },
+    },
+  })
+  async getMe(@CurrentUser() user: UserFromJwt) {
+    return this.userRepository.findById(user.id);
   }
 
   /*

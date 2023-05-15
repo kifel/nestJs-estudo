@@ -15,6 +15,40 @@ export class UserService implements UserRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
+   * This function finds a user by their ID and returns their information, including their roles, while
+   * excluding their password.
+   * @param {number} id - The id parameter is a number that represents the unique identifier of a user.
+   * It is used to query the database and retrieve the user with the matching id.
+   * @returns The `findById` method returns a `Promise` that resolves to a `UserResponse` object. This
+   * object is obtained by querying the database for a user with the specified `id`, including their
+   * associated roles. If the user is not found, a `NotFoundException` is thrown. The returned
+   * `UserResponse` object contains the user's information, with the `password` field set to `undefined`.
+   */
+  async findById(id: number): Promise<UserResponse> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        roles: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with id '${id}' not found`);
+    }
+
+    const selectedUser = {
+      ...user,
+      password: undefined,
+    };
+
+    return selectedUser;
+  }
+
+  /**
    * This is an async function that creates a new user with a specific role and checks for existing users
    * before creating.
    * @param {UserRequest} newUser - The parameter `newUser` is an object of type `UserRequest` which
@@ -69,27 +103,31 @@ export class UserService implements UserRepository {
   /**
    * This function checks if a user with the given name or email already exists in the database and
    * throws a ConflictException if so.
-   * @param {string} name - A string representing the name of the user being checked for existence.
+   * @param {string} name - A string representing the name of the user being checked for existence in the
+   * database.
    * @param {string} email - The email parameter is a string representing the email address of a user. It
-   * is used in the function to check if there is already an existing user with the same email address in
-   * the database.
+   * is used to check if there is already an existing user with the same email address in the database.
    */
   private async checkForExistingUser(name: string, email: string) {
     const existingUser = await this.prisma.user.findFirst({
       where: {
         OR: [
           {
-            name,
+            name: {
+              equals: name.toLowerCase(), // ou name.toUpperCase()
+            },
           },
           {
-            email,
+            email: {
+              equals: email.toLowerCase(), // ou email.toUpperCase()
+            },
           },
         ],
       },
     });
 
     if (existingUser) {
-      if (existingUser.name === name) {
+      if (existingUser.name.toLowerCase() === name.toLowerCase()) {
         throw new ConflictException(
           `Já existe um usuário com o nome '${name}'.`,
         );
