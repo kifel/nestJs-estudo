@@ -8,7 +8,10 @@ import { RefreshToken } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'node:crypto';
 import { PrismaService } from 'src/config/database/prisma.service';
-import { RefreshTokenRequest } from 'src/dtos/auth.dto';
+import {
+  RefreshTokenLogOutRequest,
+  RefreshTokenRequest,
+} from 'src/dtos/auth.dto';
 import { UserResponse, UserResponseLogin } from 'src/dtos/user-response.dto';
 import { UserRole } from 'src/enums/UserRole';
 import { UserFromJwt } from 'src/models/user-from-jwt';
@@ -25,6 +28,32 @@ export class AuthService implements AuthRepository {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
   ) {}
+
+  /**
+   * This is an async function that logs out a user by deleting their refresh token from the database.
+   * @param {UserFromJwt} user - UserFromJwt is likely an object representing a user that has been
+   * authenticated using JSON Web Tokens (JWTs). It probably contains information such as the user's ID and
+   * name.
+   * @param {RefreshTokenLogOutRequest} token - The `token` parameter is of type
+   * `RefreshTokenLogOutRequest` and contains the refresh token that the user wants to log out from.
+   * @returns a Promise that resolves to void.
+   */
+  async logout(
+    user: UserFromJwt,
+    token: RefreshTokenLogOutRequest,
+  ): Promise<void> {
+    const foundRefreshToken = await this.prisma.refreshToken.findFirst({
+      where: {
+        token: token.refreshToken,
+        userId: user.id,
+      },
+    });
+    if (foundRefreshToken) {
+      await this.deleteRefreshToken(foundRefreshToken.id);
+      return;
+    }
+    throw new UnauthorizedException('Unauthorized');
+  }
 
   /**
    * This function refreshes a user's access token using their refresh token if it is valid and belongs

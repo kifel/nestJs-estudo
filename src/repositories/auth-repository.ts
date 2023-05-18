@@ -1,4 +1,7 @@
-import { RefreshTokenRequest } from 'src/dtos/auth.dto';
+import {
+  RefreshTokenLogOutRequest,
+  RefreshTokenRequest,
+} from 'src/dtos/auth.dto';
 import { UserResponse, UserResponseLogin } from 'src/dtos/user-response.dto';
 import { UserRole } from 'src/enums/UserRole';
 import { UserFromJwt } from 'src/models/user-from-jwt';
@@ -11,4 +14,8 @@ export abstract class AuthRepository {
     requiredRoles: UserRole[],
   ): Promise<boolean>;
   abstract refreshToken(token: RefreshTokenRequest): Promise<UserResponseLogin>;
+  abstract logout(
+    user: UserFromJwt,
+    token: RefreshTokenLogOutRequest,
+  ): Promise<void>;
 }
