@@ -13,6 +13,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiTags,
+  ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CurrentUser } from 'src/config/decorators/current-user.decorator';
@@ -41,6 +42,16 @@ export class AuthController {
   @Post('login')
   @ApiOperation({
     summary: 'Login  do usuário na aplicação',
+  })
+  @ApiTooManyRequestsResponse({
+    description: 'Too Many Requests',
+    schema: {
+      example: {
+        statusCode: 429,
+        message: 'Too Many Requests',
+        remaining: 0,
+      },
+    },
   })
   @ApiBadRequestResponse({
     description: 'Erro no json/Request',
@@ -74,6 +85,16 @@ export class AuthController {
   @Post('refresh')
   @ApiOperation({
     summary: 'Refresh token',
+  })
+  @ApiTooManyRequestsResponse({
+    description: 'Too Many Requests',
+    schema: {
+      example: {
+        statusCode: 429,
+        message: 'Too Many Requests',
+        remaining: 0,
+      },
+    },
   })
   @ApiBadRequestResponse({
     description: 'Erro no json/Request',
@@ -111,6 +132,16 @@ export class AuthController {
   })
   @ApiOkResponse({
     description: 'Log out is successful',
+  })
+  @ApiTooManyRequestsResponse({
+    description: 'Too Many Requests',
+    schema: {
+      example: {
+        statusCode: 429,
+        message: 'Too Many Requests',
+        remaining: 0,
+      },
+    },
   })
   @ApiBadRequestResponse({
     description: 'Erro no json/Request',
