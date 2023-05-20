@@ -8,7 +8,11 @@ import { UserFromJwt } from 'src/models/user-from-jwt';
 
 export abstract class AuthRepository {
   abstract validateUser(name: string, password: string): Promise<UserResponse>;
-  abstract generateToken(user: UserResponse): Promise<UserResponseLogin>;
+  abstract generateToken(
+    user: UserResponse,
+    ip: string,
+    deviceInfo: string,
+  ): Promise<UserResponseLogin>;
   abstract validateRoles(
     user: UserFromJwt,
     requiredRoles: UserRole[],
@@ -18,4 +22,5 @@ export abstract class AuthRepository {
     user: UserFromJwt,
     token: RefreshTokenLogOutRequest,
   ): Promise<void>;
+  abstract logoutAllDevices(user: UserFromJwt): Promise<void>;
 }

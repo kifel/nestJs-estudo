@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   HttpCode,
   HttpStatus,
   Post,
@@ -75,7 +76,11 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
   async login(@Body() user: UserRequestLogin, @Request() red: AuthRequest) {
-    return await this.authRepository.generateToken(red.user);
+    return await this.authRepository.generateToken(
+      red.user,
+      red.ip,
+      red.headers['user-agent'],
+    );
   }
 
   /*
@@ -124,9 +129,8 @@ export class AuthController {
    * Logout na aplicação, aprecisa está com um token valido e ter o cargo de no minimo usuario
    */
   @Roles(UserRole.Admin, UserRole.User)
-  @Post('logout')
+  @Delete('logout')
   @ApiBearerAuth()
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Log out on this application',
   })
@@ -168,5 +172,40 @@ export class AuthController {
   ) {
     await this.authRepository.logout(user, token);
     return;
+  }
+
+  /*
+   * Logout na aplicação em todos os dispositivos, aprecisa está com um token valido e ter o cargo de no minimo usuario
+   */
+  @Delete('logout-all')
+  @Roles(UserRole.Admin, UserRole.User)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Log out on all devices',
+  })
+  @ApiOkResponse({
+    description: 'Log out is successful',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Sem autorização',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+      },
+    },
+  })
+  @ApiTooManyRequestsResponse({
+    description: 'Too Many Requests',
+    schema: {
+      example: {
+        statusCode: 429,
+        message: 'Too Many Requests',
+        remaining: 0,
+      },
+    },
+  })
+  async logoutAllDevices(@CurrentUser() user: UserFromJwt) {
+    await this.authRepository.logoutAllDevices(user);
   }
 }

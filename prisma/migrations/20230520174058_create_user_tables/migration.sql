@@ -21,6 +21,9 @@ CREATE TABLE "RefreshToken" (
     "id" SERIAL NOT NULL,
     "token" TEXT NOT NULL,
     "expiryDate" TIMESTAMP(3) NOT NULL,
+    "deviceId" TEXT NOT NULL,
+    "deviceInfo" TEXT NOT NULL,
+    "userInfo" TEXT NOT NULL,
     "userId" INTEGER NOT NULL,
 
     CONSTRAINT "RefreshToken_pkey" PRIMARY KEY ("id")

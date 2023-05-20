@@ -18,6 +18,7 @@ import { UserFromJwt } from 'src/models/user-from-jwt';
 import { UserPayload } from 'src/models/user-payload';
 import { AuthRepository } from 'src/repositories/auth-repository';
 import { UserRepository } from 'src/repositories/user-repository';
+import * as UAParser from 'ua-parser-js';
 
 // [x] Melhorar essa classe adicionando o findById, assim que for implementado essa função no user service
 
@@ -28,6 +29,21 @@ export class AuthService implements AuthRepository {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
   ) {}
+
+  /**
+   * This function logs out a user from all devices by deleting all their refresh tokens.
+   * @param {UserFromJwt} user - The `user` parameter is an object of type `UserFromJwt`, which likely
+   * contains information about a user that has been authenticated using JSON Web Tokens (JWT). This
+   * object likely contains properties such as `id`, `username`, and `email`, which can be used to
+   * identify the user in the
+   */
+  async logoutAllDevices(user: UserFromJwt): Promise<void> {
+    await this.prisma.refreshToken.deleteMany({
+      where: {
+        userId: user.id,
+      },
+    });
+  }
 
   /**
    * This is an async function that logs out a user by deleting their refresh token from the database.
@@ -56,11 +72,10 @@ export class AuthService implements AuthRepository {
   }
 
   /**
-   * This function refreshes a user's access token using their refresh token if it is valid and belongs
-   * to the correct user.
-   * @param {RefreshTokenRequest} token - The parameter `token` is an object of type
-   * `RefreshTokenRequest` which contains a `refreshToken` string property and a `userId` string
-   * property.
+   * This function refreshes a user's access token using their refresh token if it is valid and not
+   * expired.
+   * @param {RefreshTokenRequest} token - A RefreshTokenRequest object containing the refresh token and
+   * user ID.
    * @returns a Promise that resolves to a UserResponseLogin object.
    */
   async refreshToken(token: RefreshTokenRequest): Promise<UserResponseLogin> {
@@ -73,15 +88,44 @@ export class AuthService implements AuthRepository {
     if (refreshToken) {
       // Verifica se o token pertence ao usuário que foi informado e se ele esta expirado
       if (refreshToken.userId === token.userId) {
-        await this.deleteRefreshToken(refreshToken.id);
         if (!this.isRefreshTokenExpired(refreshToken)) {
           const user = await this.userRepository.findById(refreshToken.userId);
 
-          return await this.generateToken(user);
+          return await this.updateToken(user, refreshToken);
         }
+        await this.deleteRefreshToken(refreshToken.id);
       }
     }
     throw new UnauthorizedException('Dados inválidos.');
+  }
+
+  /**
+   * This function updates a refresh token with a new token and expiry date.
+   * @param {RefreshToken} refreshToken - The refreshToken parameter is an object that represents a
+   * refresh token in the system. It contains properties such as id, deviceId, token, expiryDate, and
+   * userId. The function updates the token and expiryDate properties of this object and returns the new
+   * token value.
+   * @returns a string, which is the new refresh token generated after updating the existing refresh
+   * token in the database.
+   */
+  private async updateRefreshToken(
+    refreshToken: RefreshToken,
+  ): Promise<string> {
+    const agora = new Date();
+    const trintaDiasDepois = new Date(
+      agora.getTime() + 30 * 24 * 60 * 60 * 1000,
+    );
+    const newRefreshToken = await this.prisma.refreshToken.update({
+      where: { id: refreshToken.id },
+      data: {
+        id: refreshToken.id,
+        deviceId: refreshToken.deviceId,
+        token: randomUUID(),
+        expiryDate: trintaDiasDepois,
+        userId: refreshToken.userId,
+      },
+    });
+    return newRefreshToken.token;
   }
 
   /**
@@ -113,26 +157,62 @@ export class AuthService implements AuthRepository {
   }
 
   /**
-   * This function generates a JWT access token and a refresh token for a given user.
-   * @param {UserResponse} user - A UserResponse object that contains information about a user, such as
+   * This function generates a JWT token and a refresh token for a user given their information.
+   * @param {UserResponse} user - A UserResponse object that contains information about the user, such as
    * their ID and name.
+   * @param {string} ip - The IP address of the device making the request.
+   * @param {string} deviceInfo - The `deviceInfo` parameter is a string that contains information about
+   * the device used by the user to access the application. This information can include the device type,
+   * operating system, browser, and other relevant details. The `generateToken` function uses this
+   * information to create a unique user agent string that is
    * @returns The function `generateToken` returns a Promise that resolves to an object of type
-   * `UserResponseLogin`. This object contains two properties: `accessToken` and `refreshToken`. The
-   * `accessToken` is a JSON Web Token (JWT) that is generated using the `jwtService` and contains the
-   * user's ID and name as payload. The `refreshToken` is generated by calling the `createRefresh
+   * `UserResponseLogin`, which contains an access token and a refresh token.
    */
-  async generateToken(user: UserResponse): Promise<UserResponseLogin> {
+  async generateToken(
+    user: UserResponse,
+    ip: string,
+    deviceInfo: string,
+  ): Promise<UserResponseLogin> {
     const payload: UserPayload = {
       sub: user.id,
       name: user.name,
     };
     const jwtToken = this.jwtService.sign(payload);
+    const userAgent = this.parseDeviceInfo(deviceInfo);
 
-    const refreshToken = await this.createRefreshToken(user);
+    const refreshToken = await this.createRefreshToken(user, ip, userAgent);
 
     return {
       accessToken: jwtToken,
       refreshToken: refreshToken,
+    };
+  }
+
+  /**
+   * This function updates the access and refresh tokens for a user.
+   * @param {UserResponse} user - UserResponse is an object that contains information about the user,
+   * such as their ID and name.
+   * @param {RefreshToken} refreshToken - The refreshToken parameter is an object that represents the
+   * refresh token used to obtain a new access token for a user. It likely contains information such as
+   * the token value, expiration date, and user ID associated with the token.
+   * @returns An object with two properties: `accessToken` and `refreshToken`. The `accessToken` is a
+   * JSON Web Token (JWT) signed with a payload containing the user's ID and name. The `refreshToken`
+   * is a new refresh token generated by calling the `updateRefreshToken` method with the existing
+   * refresh token.
+   */
+  private async updateToken(user: UserResponse, refreshToken: RefreshToken) {
+    const payload: UserPayload = {
+      sub: user.id,
+      name: user.name,
+    };
+
+    const jwtToken = this.jwtService.sign(payload);
+
+    const newRefreshToken = await this.updateRefreshToken(refreshToken);
+
+    return {
+      accessToken: jwtToken,
+      refreshToken: newRefreshToken,
     };
   }
 
@@ -167,13 +247,21 @@ export class AuthService implements AuthRepository {
   }
 
   /**
-   * This function creates a refresh token for a user with a 30-day expiry date.
-   * @param {UserResponse} user - The `user` parameter is of type `UserResponse`, which is likely an
-   * object containing information about a user, such as their ID, name, email, etc. This parameter is
-   * used to associate the refresh token with a specific user in the database.
-   * @returns a string which is the token generated for the refresh token.
+   * This function creates a refresh token for a user with a specified expiry date, device information,
+   * and user information.
+   * @param {UserResponse} user - A UserResponse object that contains information about the user for whom
+   * the refresh token is being created.
+   * @param {string} ip - The IP address of the device making the request.
+   * @param {string} deviceInfo - A string that contains information about the device used to generate
+   * the refresh token. This could include details such as the device type, operating system, browser,
+   * etc.
+   * @returns a string, which is the refresh token generated for the user.
    */
-  private async createRefreshToken(user: UserResponse): Promise<string> {
+  private async createRefreshToken(
+    user: UserResponse,
+    ip: string,
+    deviceInfo: string,
+  ): Promise<string> {
     const agora = new Date();
     const trintaDiasDepois = new Date(
       agora.getTime() + 30 * 24 * 60 * 60 * 1000,
@@ -183,6 +271,8 @@ export class AuthService implements AuthRepository {
         token: randomUUID(),
         userId: user.id,
         expiryDate: trintaDiasDepois,
+        deviceInfo: deviceInfo,
+        userInfo: ip,
       },
     });
     return refreshToken.token;
@@ -213,5 +303,44 @@ export class AuthService implements AuthRepository {
     );
 
     return hasRequiredRole;
+  }
+
+  /**
+   * The function parses device information from a user agent string and returns a string with the device
+   * type, model, vendor, and current time.
+   * @param {string} userAgent - The `userAgent` parameter is a string that represents the user agent of
+   * a web browser or other HTTP client. It typically includes information about the client's operating
+   * system, browser, and device.
+   * @returns a string that includes the device information parsed from the user agent string and the
+   * current time in a specific format.
+   */
+  private parseDeviceInfo(userAgent: string): string {
+    const parser = new UAParser();
+    const result = parser.setUA(userAgent).getResult();
+
+    const deviceInfoParts = [];
+
+    if (result.device) {
+      if (result.device.type) {
+        deviceInfoParts.push(result.device.type);
+      }
+
+      if (result.device.model) {
+        deviceInfoParts.push(result.device.model);
+      }
+
+      if (result.device.vendor) {
+        deviceInfoParts.push(result.device.vendor);
+      }
+    }
+
+    if (deviceInfoParts.length === 0 && result.browser && result.browser.name) {
+      deviceInfoParts.push(result.browser.name);
+    }
+
+    const deviceInfo =
+      deviceInfoParts.length > 0 ? deviceInfoParts.join(' - ') : 'Unknown';
+
+    return `Device: ${deviceInfo} - Current Time: ${new Date().toLocaleTimeString()}`;
   }
 }

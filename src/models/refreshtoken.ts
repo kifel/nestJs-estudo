@@ -3,4 +3,7 @@ export interface RefreshToken {
   token: string;
   expiryDate: Date;
   userId: string;
+  deviceId: string;
+  deviceInfo: string;
+  userInfo: string;
 }

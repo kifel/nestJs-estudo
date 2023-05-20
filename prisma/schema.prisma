@@ -32,6 +32,9 @@ model RefreshToken {
   id         Int      @id @default(autoincrement())
   token      String
   expiryDate DateTime
+  deviceId   String   @default(uuid())
+  deviceInfo String
+  userInfo   String
   user       User     @relation(fields: [userId], references: [id])
   userId     Int
 }
