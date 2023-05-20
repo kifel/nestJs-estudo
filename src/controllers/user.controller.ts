@@ -10,13 +10,13 @@ import {
   ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { CurrentUser } from 'src/config/decorators/current-user.decorator';
-import { IsPublic } from 'src/config/decorators/is-public.decorator';
-import { Roles } from 'src/config/decorators/roles.decorator';
-import { UserRequest } from 'src/dtos/user-request.dto';
-import { UserRole } from 'src/enums/UserRole';
-import { UserFromJwt } from 'src/models/user-from-jwt';
-import { UserRepository } from 'src/repositories/user-repository';
+import { CurrentUser } from '../config/decorators/current-user.decorator';
+import { IsPublic } from '../config/decorators/is-public.decorator';
+import { Roles } from '../config/decorators/roles.decorator';
+import { UserRequest } from '../dtos/user-request.dto';
+import { UserRole } from '../enums/UserRole';
+import { UserFromJwt } from '../models/user-from-jwt';
+import { UserRepository } from '../repositories/user-repository';
 
 @ApiTags('User')
 @Controller('user')

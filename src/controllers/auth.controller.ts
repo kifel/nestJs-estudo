@@ -17,19 +17,19 @@ import {
   ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { CurrentUser } from 'src/config/decorators/current-user.decorator';
-import { IsPublic } from 'src/config/decorators/is-public.decorator';
-import { Roles } from 'src/config/decorators/roles.decorator';
-import { LocalAuthGuard } from 'src/config/guards/local-auth.guard';
+import { CurrentUser } from '../config/decorators/current-user.decorator';
+import { IsPublic } from '../config/decorators/is-public.decorator';
+import { Roles } from '../config/decorators/roles.decorator';
+import { LocalAuthGuard } from '../config/guards/local-auth.guard';
 import {
   RefreshTokenLogOutRequest,
   RefreshTokenRequest,
-} from 'src/dtos/auth.dto';
-import { UserRequestLogin } from 'src/dtos/user-request.dto';
-import { UserRole } from 'src/enums/UserRole';
-import { AuthRequest } from 'src/models/auth-request';
-import { UserFromJwt } from 'src/models/user-from-jwt';
-import { AuthRepository } from 'src/repositories/auth-repository';
+} from '../dtos/auth.dto';
+import { UserRequestLogin } from '../dtos/user-request.dto';
+import { UserRole } from '../enums/UserRole';
+import { AuthRequest } from '../models/auth-request';
+import { UserFromJwt } from '../models/user-from-jwt';
+import { AuthRepository } from '../repositories/auth-repository';
 
 @ApiTags('Auth')
 @Controller()

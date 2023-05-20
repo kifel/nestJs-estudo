@@ -2,9 +2,9 @@ import {
   RefreshTokenLogOutRequest,
   RefreshTokenRequest,
 } from 'src/dtos/auth.dto';
-import { UserResponse, UserResponseLogin } from 'src/dtos/user-response.dto';
-import { UserRole } from 'src/enums/UserRole';
-import { UserFromJwt } from 'src/models/user-from-jwt';
+import { UserResponse, UserResponseLogin } from '../dtos/user-response.dto';
+import { UserRole } from '../enums/UserRole';
+import { UserFromJwt } from '../models/user-from-jwt';
 
 export abstract class AuthRepository {
   abstract validateUser(name: string, password: string): Promise<UserResponse>;

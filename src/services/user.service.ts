@@ -4,11 +4,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { PrismaService } from 'src/config/database/prisma.service';
-import { UserRequest } from 'src/dtos/user-request.dto';
-import { UserResponse } from 'src/dtos/user-response.dto';
-import { UserRole } from 'src/enums/UserRole';
-import { UserRepository } from 'src/repositories/user-repository';
+import { PrismaService } from '../config/database/prisma.service';
+import { UserRequest } from '../dtos/user-request.dto';
+import { UserResponse } from '../dtos/user-response.dto';
+import { UserRole } from '../enums/UserRole';
+import { UserRepository } from '../repositories/user-repository';
 
 @Injectable()
 export class UserService implements UserRepository {

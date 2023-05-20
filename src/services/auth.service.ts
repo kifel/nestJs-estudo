@@ -7,7 +7,6 @@ import { JwtService } from '@nestjs/jwt';
 import { RefreshToken } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'node:crypto';
-import { PrismaService } from 'src/config/database/prisma.service';
 import {
   RefreshTokenLogOutRequest,
   RefreshTokenRequest,
@@ -19,6 +18,7 @@ import { UserPayload } from 'src/models/user-payload';
 import { AuthRepository } from 'src/repositories/auth-repository';
 import { UserRepository } from 'src/repositories/user-repository';
 import * as UAParser from 'ua-parser-js';
+import { PrismaService } from '../config/database/prisma.service';
 
 // [x] Melhorar essa classe adicionando o findById, assim que for implementado essa função no user service
 
