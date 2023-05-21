@@ -8,6 +8,7 @@ import { RefreshToken } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'node:crypto';
 import {
+  RefreshTokenDevicesResponse,
   RefreshTokenLogOutRequest,
   RefreshTokenRequest,
 } from 'src/dtos/auth.dto';
@@ -22,6 +23,11 @@ import { PrismaService } from '../config/database/prisma.service';
 
 // [x] Melhorar essa classe adicionando o findById, assim que for implementado essa função no user service
 
+/*
+ * @Author Kifel
+ * The AuthService class provides methods for user authentication, token generation and validation, and
+ * device management.
+ */
 @Injectable()
 export class AuthService implements AuthRepository {
   constructor(
@@ -29,6 +35,31 @@ export class AuthService implements AuthRepository {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
   ) {}
+
+  /**
+   * This function returns an array of RefreshTokenDevicesResponse objects for a given user.
+   * @param {UserFromJwt} user - The `user` parameter is an object of type `UserFromJwt`, which likely
+   * contains information about a user that has been authenticated using JSON Web Tokens (JWT). This
+   * object is used to query the database for all refresh tokens associated with the user's ID.
+   * @returns The `allDevices` function returns an array of `RefreshTokenDevicesResponse` objects. Each
+   * object contains information about a device associated with the user's refresh token, including the
+   * user ID, device ID, device information, and user information.
+   */
+  async allDevices(user: UserFromJwt): Promise<RefreshTokenDevicesResponse[]> {
+    const foundRefreshToken = await this.prisma.refreshToken.findMany({
+      where: {
+        userId: user.id,
+      },
+    });
+    return foundRefreshToken.map((refreshToken) => {
+      return {
+        userId: refreshToken.userId,
+        deviceId: refreshToken.deviceId,
+        deviceInfo: refreshToken.deviceInfo,
+        userInfo: refreshToken.userInfo,
+      };
+    });
+  }
 
   /**
    * This function logs out a user from all devices by deleting all their refresh tokens.
@@ -341,6 +372,6 @@ export class AuthService implements AuthRepository {
     const deviceInfo =
       deviceInfoParts.length > 0 ? deviceInfoParts.join(' - ') : 'Unknown';
 
-    return `Device: ${deviceInfo} - Current Time: ${new Date().toLocaleTimeString()}`;
+    return `Device: ${deviceInfo} - Current Time: ${new Date().toLocaleString()}`;
   }
 }

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
@@ -35,6 +36,38 @@ import { AuthRepository } from '../repositories/auth-repository';
 @Controller()
 export class AuthController {
   constructor(private readonly authRepository: AuthRepository) {}
+
+  /*
+   * Todos os dispositivos que realizaram login na aplicação
+   */
+  @Roles(UserRole.Admin, UserRole.User)
+  @Get('all-devices')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'All devices',
+  })
+  @ApiTooManyRequestsResponse({
+    description: 'Too Many Requests',
+    schema: {
+      example: {
+        statusCode: 429,
+        message: 'Too Many Requests',
+        remaining: 0,
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Sem autorização',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: 'Unauthorized',
+      },
+    },
+  })
+  async allDevices(@CurrentUser() user: UserFromJwt) {
+    return await this.authRepository.allDevices(user);
+  }
 
   /*
    * Login na aplicação, gerar token

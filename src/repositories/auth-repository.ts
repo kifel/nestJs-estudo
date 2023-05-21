@@ -1,4 +1,5 @@
 import {
+  RefreshTokenDevicesResponse,
   RefreshTokenLogOutRequest,
   RefreshTokenRequest,
 } from 'src/dtos/auth.dto';
@@ -23,4 +24,7 @@ export abstract class AuthRepository {
     token: RefreshTokenLogOutRequest,
   ): Promise<void>;
   abstract logoutAllDevices(user: UserFromJwt): Promise<void>;
+  abstract allDevices(
+    user: UserFromJwt,
+  ): Promise<RefreshTokenDevicesResponse[]>;
 }
