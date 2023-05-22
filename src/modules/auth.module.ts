@@ -1,6 +1,7 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { AppGateway } from 'src/config/getaway/app.gateway';
 import { LoginValidationMiddleware } from 'src/config/middleware/login-validation.middleware';
 import { PrismaService } from '../config/database/prisma.service';
 import { JwtStrategy } from '../config/strategy/jwt.strategt';
@@ -26,6 +27,7 @@ import { UserModule } from './user.module';
       provide: AuthRepository,
       useClass: AuthService,
     },
+    AppGateway,
     LocalStrategy,
     JwtStrategy,
   ],

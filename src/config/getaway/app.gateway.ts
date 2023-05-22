@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -7,21 +7,24 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
+import { wsAuthGuard } from '../guards/ws-auth.guard';
+import { SocketAuthMiddleware } from '../middleware/ws.middleware';
 
 @WebSocketGateway({
   cors: {
     origin: 'http://127.0.0.1:5500',
-    credentials: true,
   },
 })
+@UseGuards(wsAuthGuard)
 export class AppGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   handleDisconnect(client: any) {
     this.logger.log(`Disconect ${client.id}`);
   }
-  afterInit(server: any) {
+  afterInit(client: Socket) {
+    client.use(SocketAuthMiddleware() as any);
     this.logger.log('Init');
   }
   handleConnection(client: any, ...args: any[]) {
