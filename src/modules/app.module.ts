@@ -1,5 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { AppGateway } from 'src/config/getaway/app.gateway';
 import { JwtAuthGuard } from '../config/guards/jwt-auth.guard';
 import { RolesGuard } from '../config/guards/roles.guard';
 import { LoggingMiddleware } from '../config/middleware/Logging.middleware';
@@ -18,6 +19,7 @@ import { UserModule } from './user.module';
       provide: APP_GUARD,
       useClass: RolesGuard,
     },
+    AppGateway,
   ],
 })
 export class AppModule implements NestModule {
