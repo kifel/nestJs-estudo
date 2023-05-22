@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -162,7 +161,8 @@ export class AuthController {
    * Logout na aplicação, aprecisa está com um token valido e ter o cargo de no minimo usuario
    */
   @Roles(UserRole.Admin, UserRole.User)
-  @Delete('logout')
+  @HttpCode(HttpStatus.OK)
+  @Post('logout')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Log out on this application',
@@ -210,7 +210,8 @@ export class AuthController {
   /*
    * Logout na aplicação em todos os dispositivos, aprecisa está com um token valido e ter o cargo de no minimo usuario
    */
-  @Delete('logout-all')
+  @Post('logout-all')
+  @HttpCode(HttpStatus.OK)
   @Roles(UserRole.Admin, UserRole.User)
   @ApiBearerAuth()
   @ApiOperation({
