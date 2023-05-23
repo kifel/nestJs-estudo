@@ -1,3 +1,4 @@
+import { UnauthorizedException } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { wsAuthGuard } from '../guards/ws-auth.guard';
 
@@ -11,7 +12,11 @@ export const SocketAuthMiddleware = (): SocketIOMiddleWare => {
       wsAuthGuard.validateToken(cliente);
       next();
     } catch (err) {
-      next(err);
+      if (err.message === 'jwt expired') {
+        next(new UnauthorizedException('Token expired'));
+      } else {
+        next(err);
+      }
     }
   };
 };

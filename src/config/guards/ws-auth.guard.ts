@@ -1,8 +1,12 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { Observable } from 'rxjs';
 import { Socket } from 'socket.io';
-import { UnauthorizedError } from 'src/errors/unauthorized.error';
 
 @Injectable()
 export class wsAuthGuard implements CanActivate {
@@ -26,7 +30,11 @@ export class wsAuthGuard implements CanActivate {
       const payload = jwt.verify(token, process.env.JWT_SECRET);
       return payload;
     } catch (err) {
-      throw new UnauthorizedError(err.message);
+      if (err.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Token expired');
+      } else {
+        throw new UnauthorizedException(err?.message);
+      }
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Logger, UseGuards } from '@nestjs/common';
+import { Logger, UseFilters, UseGuards } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -8,6 +8,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { UnauthorizedExceptionFilter } from 'src/config/filter/websocket-exceptions.filter';
 import { wsAuthGuard } from '../guards/ws-auth.guard';
 import { SocketAuthMiddleware } from '../middleware/ws.middleware';
 
@@ -17,6 +18,7 @@ import { SocketAuthMiddleware } from '../middleware/ws.middleware';
   },
 })
 @UseGuards(wsAuthGuard)
+@UseFilters(UnauthorizedExceptionFilter)
 export class AppGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
