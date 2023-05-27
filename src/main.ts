@@ -11,6 +11,21 @@ async function bootstrap() {
       methods: ['GET', 'POST', 'PUT', 'DELETE'],
     },
   });
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header(
+      'Access-Control-Allow-Headers',
+      'Origin, X-Requested-With, Content-Type, Accept',
+    );
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    if (req.method === 'OPTIONS') {
+      res.sendStatus(200);
+    } else {
+      next();
+    }
+  });
+
+  app.enableCors();
   const port = process.env.PORT || 3000;
 
   const config = new DocumentBuilder()
@@ -28,22 +43,6 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   app.useGlobalPipes(new ValidationPipe());
-
-  app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header(
-      'Access-Control-Allow-Headers',
-      'Origin, X-Requested-With, Content-Type, Accept',
-    );
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-    if (req.method === 'OPTIONS') {
-      res.sendStatus(200);
-    } else {
-      next();
-    }
-  });
-
-  app.enableCors();
 
   await app.listen(port, '0.0.0.0');
 
