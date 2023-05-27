@@ -14,7 +14,7 @@ import { SocketAuthMiddleware } from '../middleware/ws.middleware';
 
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: true,
   },
 })
 @UseGuards(wsAuthGuard)
