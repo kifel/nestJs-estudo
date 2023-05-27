@@ -18,6 +18,7 @@ import { UserFromJwt } from 'src/models/user-from-jwt';
 import { UserPayload } from 'src/models/user-payload';
 import { AuthRepository } from 'src/repositories/auth-repository';
 import { UserRepository } from 'src/repositories/user-repository';
+import * as UAParser from 'ua-parser-js';
 import { PrismaService } from '../config/database/prisma.service';
 
 // [x] Melhorar essa classe adicionando o findById, assim que for implementado essa função no user service
@@ -347,32 +348,32 @@ export class AuthService implements AuthRepository {
    * current time in a specific format.
    */
   private parseDeviceInfo(userAgent: string): string {
-    // const parser = new UAParser();
-    // const result = parser.setUA(userAgent).getResult();
+    const parser = new UAParser();
+    const result = parser.setUA(userAgent).getResult();
 
-    // const deviceInfoParts = [];
+    const deviceInfoParts = [];
 
-    // if (result.device) {
-    //   if (result.device.type) {
-    //     deviceInfoParts.push(result.device.type);
-    //   }
+    if (result.device) {
+      if (result.device.type) {
+        deviceInfoParts.push(result.device.type);
+      }
 
-    //   if (result.device.model) {
-    //     deviceInfoParts.push(result.device.model);
-    //   }
+      if (result.device.model) {
+        deviceInfoParts.push(result.device.model);
+      }
 
-    //   if (result.device.vendor) {
-    //     deviceInfoParts.push(result.device.vendor);
-    //   }
-    // }
+      if (result.device.vendor) {
+        deviceInfoParts.push(result.device.vendor);
+      }
+    }
 
-    // if (deviceInfoParts.length === 0 && result.browser && result.browser.name) {
-    //   deviceInfoParts.push(result.browser.name);
-    // }
+    if (deviceInfoParts.length === 0 && result.browser && result.browser.name) {
+      deviceInfoParts.push(result.browser.name);
+    }
 
-    // const deviceInfo =
-    //   deviceInfoParts.length > 0 ? deviceInfoParts.join(' - ') : 'Unknown';
+    const deviceInfo =
+      deviceInfoParts.length > 0 ? deviceInfoParts.join(' - ') : 'Unknown';
 
-    return `Device: Chrome - Current Time: ${new Date().toLocaleString()}`;
+    return `Device: ${deviceInfo} - Current Time: ${new Date().toLocaleString()}`;
   }
 }
