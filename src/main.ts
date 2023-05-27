@@ -23,6 +23,11 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
 
+  app.enableCors({
+    origin: true, // Habilitar CORS para todas as origens
+    allowedHeaders: 'Authorization, Content-Type, Access-Control-Allow-Origin',
+  });
+
   await app.listen(port, '0.0.0.0');
 
   console.log(`Application is running on: ${await app.getUrl()}`);
