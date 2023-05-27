@@ -8,7 +8,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { UnauthorizedExceptionFilter } from 'src/config/filter/websocket-exceptions.filter';
+import { UnauthorizedExceptionFilter } from '../filter/websocket-exceptions.filter';
 import { wsAuthGuard } from '../guards/ws-auth.guard';
 import { SocketAuthMiddleware } from '../middleware/ws.middleware';
 
