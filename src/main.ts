@@ -24,7 +24,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   app.enableCors({
-    origin: '*',
+    origin: true, // Habilitar CORS para todas as origens
   });
 
   await app.listen(port, '0.0.0.0');
