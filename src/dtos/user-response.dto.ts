@@ -21,6 +21,12 @@ export class UserResponse {
 
 export class UserResponseLogin {
   /**
+   * Indexificador único do usuário
+   * @example 1
+   */
+  id: number;
+
+  /**
    * Token de autenticação do usuário, valido por 15 minutos
    * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
    */

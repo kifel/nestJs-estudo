@@ -214,6 +214,7 @@ export class AuthService implements AuthRepository {
     const refreshToken = await this.createRefreshToken(user, ip, userAgent);
 
     return {
+      id: user.id,
       accessToken: jwtToken,
       refreshToken: refreshToken,
     };
@@ -242,6 +243,7 @@ export class AuthService implements AuthRepository {
     const newRefreshToken = await this.updateRefreshToken(refreshToken);
 
     return {
+      id: user.id,
       accessToken: jwtToken,
       refreshToken: newRefreshToken,
     };

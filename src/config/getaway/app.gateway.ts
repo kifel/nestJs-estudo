@@ -14,7 +14,7 @@ import { SocketAuthMiddleware } from '../middleware/ws.middleware';
 
 @WebSocketGateway({
   cors: {
-    origin: 'http://127.0.0.1:5500',
+    origin: '*',
   },
 })
 @UseGuards(wsAuthGuard)
@@ -23,20 +23,36 @@ export class AppGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   handleDisconnect(client: any) {
-    this.logger.log(`Disconect ${client.id}`);
+    const { emissorId } = client['user'];
+    this.logger.log(`Disconnected ${client.id} - User ID: ${emissorId}`);
   }
+
   afterInit(client: Socket) {
     client.use(SocketAuthMiddleware() as any);
-    this.logger.log('Init');
+    this.logger.log('Initialized');
   }
+
   handleConnection(client: any, ...args: any[]) {
-    this.logger.log(`Connection ${client.id}`);
+    const { emissorId } = client['user'];
+    if (!emissorId) {
+      const errorMessage = 'Token inválido ou expirado';
+      client.send('exception', errorMessage); // Envia mensagem de erro para o cliente
+      client.disconnect(); // Desconecta o cliente
+      return;
+    }
+    this.logger.log(`Connected ${client.id} - User ID: ${emissorId}`);
   }
+
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('AppGateway');
 
   @SubscribeMessage('msgToServer')
   handleMessage(client: any, payload: any): void {
-    this.server.emit('msgToClient', payload, client.id);
+    const emissor = client['user'];
+    const emissorId = emissor.id;
+    const emissorName = emissor.name;
+
+    const messageWithEmissor = { emissorId, emissorName, payload };
+    this.server.emit('msgToClient', messageWithEmissor);
   }
 }

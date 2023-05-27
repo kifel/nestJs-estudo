@@ -27,7 +27,7 @@ async function bootstrap() {
     origin: '*',
   });
 
-  await app.listen(port, '0.0.0.0');
+  await app.listen(port, '192.168.1.64');
 
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
