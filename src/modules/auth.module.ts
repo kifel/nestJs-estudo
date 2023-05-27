@@ -1,9 +1,9 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { AppGateway } from 'src/config/getaway/app.gateway';
-import { LoginValidationMiddleware } from 'src/config/middleware/login-validation.middleware';
 import { PrismaService } from '../config/database/prisma.service';
+import { AppGateway } from '../config/getaway/app.gateway';
+import { LoginValidationMiddleware } from '../config/middleware/login-validation.middleware';
 import { JwtStrategy } from '../config/strategy/jwt.strategt';
 import { LocalStrategy } from '../config/strategy/local.strategy';
 import { AuthController } from '../controllers/auth.controller';
