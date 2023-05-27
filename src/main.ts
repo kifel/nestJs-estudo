@@ -25,16 +25,6 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
 
-  const options = {
-    origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-    credentials: true,
-  };
-  //app.use(cors(options))
-  app.enableCors(options);
-
   await app.listen(port, '0.0.0.0');
 
   console.log(`Application is running on: ${await app.getUrl()}`);
