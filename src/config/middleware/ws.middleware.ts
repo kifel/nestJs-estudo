@@ -10,14 +10,15 @@ export const SocketAuthMiddleware = (): SocketIOMiddleWare => {
   return (client, next) => {
     try {
       const user = wsAuthGuard.validateToken(client);
-      client['user'] = user; // Define o usuário no cliente conectado
+      client['user'] = user;
       next();
     } catch (err) {
-      if (err.message === 'jwt expired') {
-        client.send('exception', 'Token expired'); // Enviar mensagem de erro para o cliente
-        next(new UnauthorizedException('Token expired'));
-      } else {
+      if (err instanceof UnauthorizedException) {
         next(err);
+      } else if (err.message === 'jwt expired') {
+        next(new UnauthorizedException('Token expired', 'TokenExpired'));
+      } else {
+        next(new UnauthorizedException(err.message));
       }
     }
   };

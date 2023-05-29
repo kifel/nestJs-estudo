@@ -1,6 +1,7 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { UnauthorizedExceptionFilter } from 'src/config/filter/websocket-exceptions.filter';
 import { PrismaService } from '../config/database/prisma.service';
 import { AppGateway } from '../config/getaway/app.gateway';
 import { LoginValidationMiddleware } from '../config/middleware/login-validation.middleware';
@@ -17,7 +18,7 @@ import { UserModule } from './user.module';
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '15m' },
+      signOptions: { expiresIn: '1m' },
     }),
   ],
   controllers: [AuthController],
@@ -30,6 +31,7 @@ import { UserModule } from './user.module';
     AppGateway,
     LocalStrategy,
     JwtStrategy,
+    UnauthorizedExceptionFilter,
   ],
   exports: [AuthRepository],
 })
